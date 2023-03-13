@@ -20,11 +20,10 @@
             <div style="margin: 5px 0px;">{{ $res->date->format('F d, Y') }}</div>
 
             <div style="border:1px solid black">
-                <div
-                    style="padding:10px; display: flex; justify-content: space-between; background-color: rgb(235, 235, 235);">
-                    <div>{{ $res->full_name }}</div>
-                    <div style="color:red">{{ $res->status }}</div>
-                    <div>{{ $res->time }}</div>
+                <div style="padding:10px; background-color: rgb(235, 235, 235);">
+                    <div>{{ $res->full_name }} | {{ $res->status }}</div>
+
+                    <div style="float: right">{{ $res->time }}</div>
                 </div>
                 <div style="padding: 10px;">
                     <div style="margin-top: 5px;">

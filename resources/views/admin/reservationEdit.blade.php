@@ -50,13 +50,13 @@
                             Pending</option>
                         <option @if ($res->status == 'confirmed') selected @endif value="confirmed">
                             Confirmed</option>
-                        <option @if ($res->status == 'declined') selected @endif value="pending">
+                        <option @if ($res->status == 'declined') selected @endif value="declined">
                             Closed</option>
                     </select>
                     <div class="text-start mt-4 space-x-4">
 
-                        <input type="checkbox" name="send_email" id=""><label for="status"
-                            class="text-black italic font-extrabold   text-start tical"> Send
+                        <input type="checkbox" name="send_email" class="text-blue-900 rounded-md"><label for="status"
+                            class="text-black italic font-extrabold align-sub text-start "> Send
                             Notification</label>
                     </div>
                     <button type="submit" class="btn bg-blue-900 btn-primary btn-block">Edit Booking</button>

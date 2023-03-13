@@ -25,20 +25,20 @@
                     <span class="mx-6 block md:inline">
                         @if ($res->status == 'pending')
                             <a type="button" data-toggle="modal" data-target="#emailConfirmModal"
-                                class="py-1 float-left text-white badge badge-success px-1   rounded-md">Confirme</a>
+                                class="py-1 float-left text-white badge bg-green-400 badge-success px-1   rounded-md">Confirme</a>
                             <a type="button" data-toggle="modal" data-target="#emailRejectModal"
-                                class="py-1 float-left text-white badge badge-warning px-1 mx-2 rounded-md">Reject</a>
+                                class="py-1 float-left text-white badge bg-yellow-400 badge-warning px-1 mx-2 rounded-md">Reject</a>
                         @elseif($res->status == 'confirmed')
                             <a type="button" data-toggle="modal" data-target="#emailRejectModal"
-                                class="py-1 float-left text-white badge badge-warning px-1  rounded-md">Reject</a>
+                                class="py-1 float-left text-white bg-yellow-400 badge badge-warning px-1  rounded-md">Reject</a>
                         @elseif($res->status == 'declined')
                             <a type="button" data-toggle="modal" data-target="#emailConfirmModal"
-                                class="py-1 float-left text-white badge badge-success px-1 rounded-md">Confirme</a>
+                                class="py-1 float-left text-white bg-green-400 badge badge-success px-1 rounded-md">Confirme</a>
                         @endif
                         <a type="button" data-toggle="modal" data-target="#emailDeletemModal"
-                            class="py-1 float-right px-1 text-white badge badge-danger rounded-md">Delete</a>
+                            class="py-1 float-right px-1 text-white bg-red-400 badge badge-danger rounded-md">Delete</a>
                         <a href="{{ route('reservation.edit', $res->id) }}"
-                            class="py-1 float-right px-1 text-white badge badge-primary rounded-md mx-2">EDIT</a>
+                            class="py-1 float-right px-1 text-white bg-blue-400 badge badge-primary rounded-md mx-2">EDIT</a>
                     </span>
                 </div>
                 <div class="form-group ">

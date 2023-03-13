@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="{{ asset('css/jqueryConfirm.css') }}">
     <link rel="stylesheet" href="{{ asset('toaster/toaster.css') }}">
 
+    {{-- now --}}
+    <link rel="stylesheet" href="{{ asset('assets/plugins/jvectormap/jquery-jvectormap-2.0.3.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/plugins/charts-c3/plugin.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/plugins/morrisjs/morris.min.css') }}" />
 
     <style>
         .buttons-copy,
@@ -39,13 +43,50 @@
 @endsection
 
 @section('content')
+    @php
+        $bookings = app\Models\Resevation::all();
+        $booking_counts = $bookings->groupBy('status')->map(function ($status) {
+            return $status->count();
+        });
+    @endphp
     <div class="mt-10">
-        <h1 class="text-center">BOOKINGS</h1>
+        <h1 class="text-center text-4xl my-4 font-semibold">BOOKINGS</h1>
         <div class="col-lg-12">
             <div class="card">
 
-                <div class="body shadow-2xl px-20">
-
+                <div class="body shadow-2xl px-20 ">
+                    <div class="row clearfix justify-center space-x-3 my-4">
+                        <div class="col-lg-3 col-md-6 col-sm-6 bg-red-200">
+                            <div class="state_w1 mb-1 mt-1">
+                                <div class="d-flex justify-content-center">
+                                    <div>
+                                        <h5 class="text-center">{{ $booking_counts['pending'] }}</h5>
+                                        <span><i class="fa-solid fa-clock text-yellow-600"></i> Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 bg-teal-200">
+                            <div class="state_w1 mb-1 mt-1">
+                                <div class="d-flex justify-content-center">
+                                    <div>
+                                        <h5 class="text-center">{{ $booking_counts['confirmed'] }}</h5>
+                                        <span><i class="fa-solid fa-square-check text-green-800"></i> Confirmed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 bg-yellow-200">
+                            <div class="state_w1 mb-1 mt-1">
+                                <div class="d-flex justify-content-center">
+                                    <div>
+                                        <h5 class="text-center">{{ $booking_counts['declined'] }}</h5>
+                                        <span><i class="fa-solid fa-x text-red-600"></i> Closed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <form id="allEventForm" action="{{ route('reservation.destroy') }}" method="post" autocomplete="off">
                         @csrf
                         @method('DELETE')
@@ -55,7 +96,8 @@
                                     class="px-3 py-2 bg-slate-900 shadow-xl hover:bg-slate-800 text-white rounded ">Export
                                 </button>
                                 <button disabled id="deleteEventButton" name="deleteEventButton" type="submit"
-                                    class="btn shadow-xl btn-danger waves-effect"><i class="zmdi zmdi-delete"></i>
+                                    class="btn shadow-xl bg-red-500 btn-danger waves-effect"><i
+                                        class="zmdi zmdi-delete"></i>
                                     Supprimé</button>
                             </div>
                         </div>
@@ -64,8 +106,8 @@
                             <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
                                 <thead>
                                     <tr>
-                                        <th data-orderable="false"> <input class="text-blue-900 rounded" id="makeAllChecked" type="checkbox"
-                                                name="checkallbox"></th>
+                                        <th data-orderable="false"> <input class="text-blue-900 rounded" id="makeAllChecked"
+                                                type="checkbox" name="checkallbox"></th>
                                         <th>Date</th>
                                         <th>ID</th>
                                         <th>Nom</th>
@@ -84,11 +126,13 @@
                                         @else
                                         pending @endif">
                                             <td>
-                                                <input class="evenCheckBox text-blue-900 rounded" type="checkbox" @checked(false)
-                                                    name="bookings[]" value="{{ $res->id }}">
+                                                <input class="evenCheckBox text-blue-900 rounded" type="checkbox"
+                                                    @checked(false) name="bookings[]"
+                                                    value="{{ $res->id }}">
                                             </td>
                                             <td>{{ $res->date->format('F d, Y') . ' ' . $res->time }}</td>
-                                            <td><a href="{{ route('reservation.show', $res->id) }}">#{{ $res->id }}</a>
+                                            <td><a
+                                                    href="{{ route('reservation.show', $res->id) }}">#{{ $res->id }}</a>
                                             </td>
                                             <td>{{ $res->full_name }}</td>
                                             <td>{{ $res->email }}</td>
@@ -121,6 +165,13 @@
     <script src="{{ asset('js/jqueryConfirm.js') }}"></script>
     <script src="{{ asset('assets/plugins/select2/select2.min.js') }}"></script>
     <script src="{{ asset('toaster/toaster.js') }}"></script>
+
+
+    <script src="{{ asset('assets/bundles/jvectormap.bundle.js') }}"></script>
+    <script src="{{ asset('assets/bundles/sparkline.bundle.js') }}"></script>
+    <script src="{{ asset('assets/bundles/c3.bundle.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/index.js') }}"></script>
+
 
     <script>
         const ToasterOptions = {

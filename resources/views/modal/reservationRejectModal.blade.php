@@ -15,7 +15,7 @@
                             class="form-group">
                             @csrf
                             <textarea class="w-full form-control" name="emailMessage" placeholder="Email Message" id="" cols="30"
-                                rows="5"></textarea>
+                                rows="5">Donnez-nous quelques instants pour nous assurer que nous avons de la place pour vous. Nous sommes complets ou pas ouverts à l'heure que vous avez demandée :</textarea>
                         </form>
                     </div>
                     <div class="modal-footer">

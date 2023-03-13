@@ -13,8 +13,10 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        Bookings <span
-                            class="px-2 py-1 mx-2 bg-danger rounded-full text-white">{{ $bokking_counts }}</span>
+                        Bookings @if (isset($bookings))
+                            <span
+                                class="px-2 py-1 mx-2 bg-danger rounded-full text-white">{{ $bookings->count() }}</span>
+                        @endif
                     </x-nav-link>
                 </div>
             </div>

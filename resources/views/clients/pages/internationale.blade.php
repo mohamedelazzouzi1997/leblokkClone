@@ -26,7 +26,7 @@
                 <p class="text-lg md:text-3xl font-extrabold text-center mt-10"> l’ambiance feutrée de nos spectacles </p>
             </div>
         </div>
-        <div class="px-6 md:px-60 my-16 text-white">
+        <div class="px-6 md:px-40 my-16 text-white">
             <div class="mx-auto text-center">
                 <h1 class="text-center font-thin  italic fw-dancing text-2xl">
                     Goûtez la différence

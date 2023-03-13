@@ -65,7 +65,7 @@ class ReservationController extends Controller
             'origin'=> $origin_to_store,
         ]);
         \session()->flash('success','Merci votre demande de réservation est en attente de confirmation. Les mises à jour seront envoyées à l\'adresse e-mail que vous avez fournie.');
-            Mail::to($request->email)->send(new ReservationEmail($res,'reserve'));
+            Mail::to($request->email)->send(new ReservationEmail($res,'reserve','no message'));
         return back();
     }
 
@@ -149,6 +149,15 @@ class ReservationController extends Controller
             'status'=> 'required' ,
             'number_of_persons'=> 'required' ,
         ]);
+        if($request->status == 'declined'){
+            $status = 'reject';
+        }elseif($request->status == 'confirmed'){
+            $status = 'confirm';
+
+        }else{
+            $status = 'pending';
+        }
+        $emailMessage = '';
         $res = Resevation::findOrfail($id);
 
        $res->update([
@@ -160,6 +169,10 @@ class ReservationController extends Controller
             'status'=> $request->status,
             'number_of_persons'=> $request->number_of_persons,
         ]);
+        if($request->has('send_email'))
+            Mail::to($request->email)->send(new ReservationEmail($res,$status,$emailMessage ));
+
+
         session()->flash('success','La reservation a été modifier.');
         return back();
     }
@@ -182,7 +195,7 @@ class ReservationController extends Controller
 
         }elseif($request->date== 'today'){
             $date = 'today';
-            $reservations = Resevation::whereDate('date','>',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
+            $reservations = Resevation::whereDate('date',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
 
             // $reservations = Resevation::whereDate('date',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
         }

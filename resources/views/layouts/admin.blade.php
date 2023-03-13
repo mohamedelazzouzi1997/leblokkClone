@@ -17,17 +17,21 @@
     {{-- <link rel="stylesheet" href="{{ asset('bootstrap/bootstrap.min.css') }}"> --}}
 
     <link rel="stylesheet" href="{{ asset('css/adminstyle.min.css') }}">
+    {{-- @vite('resources/css/app.css') --}}
     <link rel="stylesheet" href="{{ asset('assets/plugins/bootstrap/css/bootstrap.min.css') }}">
-    @vite('resources/css/app.css')
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('assets/css/style.min.css') }}">
-    {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
     @yield('styles')
 </head>
 
 <body class="bg-slate-100">
-    @php
-        $bokking_counts = app\Models\Resevation::where('status', 'pending')->count();
-    @endphp
+
+    @if (request()->route()->getName() != 'profile.show' ||
+            request()->route()->getName() != 'dashboard')
+        @php
+            $bookings = app\Models\Resevation::all();
+        @endphp
+    @endif
     @include('navigation-menu')
     @yield('content')
 
