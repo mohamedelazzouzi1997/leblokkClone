@@ -5,11 +5,25 @@
 @endsection
 
 @section('befor-style')
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.css" rel="stylesheet" />
 @endsection
 @section('styles')
     <link rel="stylesheet" href="{{ asset('toaster/toaster.css') }}">
+    <link href="{{ asset('css/datepicker.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/timepicker.css') }}">
+    {{-- <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet"> --}}
+    <style>
+        .ui-timepicker-viewport {
+            color: #EB8C3E !important;
+        }
+
+        .bg-orange-400 {
+            background-color: #e78f08 !important;
+        }
+
+        .bg-orange-400:hover {
+            background-color: #e7a848 !important;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -22,9 +36,9 @@
         <div class="absolute bottom-0 right-0 left-0 top-0 bg-black opacity-50">
 
         </div>
-        <div class=" text-white z-10 mb-10 md:mt-20 mt-28">
+        <div class=" text-white mb-10 md:mt-20 mt-28">
             <div class="px-3 py-3 opacity-80 bg-black">
-                <form action="{{ route('reservation.store') }}" method="post" class="z-20">
+                <form action="{{ route('reservation.store') }}" method="post" class="">
                     @csrf
                     <input type="hidden" name="origin" value="{{ $origin }}">
 
@@ -45,7 +59,7 @@
                             <input name="phone" value="{{ old('phone') }}"
                                 class="px-3 py-3 bg-black border-2 border-orange-300  @error('phone') border-red-500 @enderror"
                                 placeholder="Telephone" type="text">
-                            <input name="date" value="{{ old('date') }}"
+                            <input id="datepicker" name="date" value="{{ old('date') }}"
                                 class="px-3 py-3 bg-black border-2 border-orange-300  @error('date') border-red-500 @enderror"
                                 placeholder="Date" type="text" datepicker datepicker-autohide>
                             <input name="time" value="{{ old('time') }}"
@@ -190,10 +204,30 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/datepicker.min.js"></script>
     <script src="{{ asset('js/timepicker.js') }}"></script>
     <script src="{{ asset('toaster/toaster.js') }}"></script>
+    <script src="{{ asset('js/datepicker.js') }}"></script>
     <script>
+        $(function() {
+            $.datepicker.setDefaults({
+                monthNames: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août",
+                    "Septembre", "Octobre", "Novembre", "Décembre"
+                ]
+            });
+            $("#datepicker").datepicker({
+                minDate: 0,
+                dateFormat: 'mm/dd/yy',
+                inline: true,
+                // numberOfMonths: [1],
+                dayNamesMin: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                beforeShowDay: function(date) {
+                    var day = date.getDay();
+                    return [(day != 1)];
+                }
+            });
+        });
+
+
         const ToasterOptions = {
             "closeButton": false,
             "debug": false,

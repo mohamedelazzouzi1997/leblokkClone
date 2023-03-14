@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 // use Barryvdh\DomPDF\Facade as PDF;
 // use Barryvdh\DomPDF\PDF;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Resevation;
 use Illuminate\Http\Request;
 use App\Mail\ReservationEmail;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\ReservationExport;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -38,13 +39,13 @@ class ReservationController extends Controller
             'number_of_persons'=> 'required' ,
         ]);
 
-        // dd(Carbon::parse($request->date)->format('Y-m-d'));
         $origin_array = [
             'tk' => 'tiktok',
             'in' => 'instagrame',
-            'fb' => 'facebook',
+            'fbads' => 'facebookAds',
             'yt' => 'youtube',
         ];
+
         $origin_to_store = 'direct';
         foreach($origin_array as $key => $value){
             if($request->origin == $key){
@@ -52,9 +53,20 @@ class ReservationController extends Controller
                 break;
             }
         }
+        $data = [
+            'full_name'=> $request->name ,
+            'email'=> $request->email ,
+            'phone'=> $request->phone ,
+            'date'=> Carbon::parse($request->date)->format('Y-m-d') ,
+            'time'=> $request->time ,
+            'number_of_persons'=> $request->number_of_persons ,
+            'message'=> $request->message ,
+            'origin'=> $origin_to_store,
+        ];
 
+        $res = Resevation::create($data);
 
-        $res = Resevation::create([
+        $response = Http::post('https://dash.leblokk.com/api/res', [
             'full_name'=> $request->name ,
             'email'=> $request->email ,
             'phone'=> $request->phone ,
@@ -64,6 +76,7 @@ class ReservationController extends Controller
             'message'=> $request->message ,
             'origin'=> $origin_to_store,
         ]);
+
         \session()->flash('success','Merci votre demande de réservation est en attente de confirmation. Les mises à jour seront envoyées à l\'adresse e-mail que vous avez fournie.');
             Mail::to($request->email)->send(new ReservationEmail($res,'reserve','no message'));
         return back();
