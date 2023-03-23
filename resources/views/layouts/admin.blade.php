@@ -29,7 +29,8 @@
     @if (request()->route()->getName() != 'profile.show' ||
             request()->route()->getName() != 'dashboard')
         @php
-            $bookings = app\Models\Resevation::all();
+            $bookings = app\Models\Resevation::where('deleted', 0)->get();
+            $deleted_bookings = app\Models\Resevation::where('deleted', 1)->get();
         @endphp
     @endif
     @include('navigation-menu')

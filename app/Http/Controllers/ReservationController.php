@@ -5,30 +5,47 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 // use Barryvdh\DomPDF\Facade as PDF;
 // use Barryvdh\DomPDF\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Resevation;
 use Illuminate\Http\Request;
 use App\Mail\ReservationEmail;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\ReservationExport;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Http;
 
 class ReservationController extends Controller
 {
     //
     public function index(){
-        $reservations = Resevation::latest('id')->get();
+
+            $reservations = Resevation::latest('id')->where('deleted',0)->get();
+
         // dd($reservations);
         return view('admin.dashboard',compact('reservations'));
     }
+    public function deletedReservation(){
+        
+            $reservations = Resevation::latest('id')->where('deleted',1)->get();
 
+        // dd($reservations);
+        return view('admin.deletedReservation',compact('reservations'));
+    }
+    public function restorReservation($id){
+        $res = Resevation::findOrfail($id);
+
+        $res->update([
+            'deleted'=> 0
+        ]);
+
+        session()->flash('success','Rservation a été Restoré avec succée');
+        return to_route('dashboard');
+    }
     public function show($id){
         $res = Resevation::findOrfail($id);
 
         return view('admin.reservationDetails',compact('res'));
     }
-
     public function store(Request $request){
         $request->validate([
             'name'=> 'required' ,
@@ -66,21 +83,50 @@ class ReservationController extends Controller
 
         $res = Resevation::create($data);
 
-        $response = Http::post('https://dash.leblokk.com/api/res', [
-            'full_name'=> $request->name ,
-            'email'=> $request->email ,
-            'phone'=> $request->phone ,
-            'date'=> Carbon::parse($request->date)->format('Y-m-d') ,
-            'time'=> $request->time ,
-            'number_of_persons'=> $request->number_of_persons ,
-            'message'=> $request->message ,
-            'origin'=> $origin_to_store,
-        ]);
-
         \session()->flash('success','Merci votre demande de réservation est en attente de confirmation. Les mises à jour seront envoyées à l\'adresse e-mail que vous avez fournie.');
             Mail::to($request->email)->send(new ReservationEmail($res,'reserve','no message'));
         return back();
     }
+    // public function store(Request $request){
+    //     $request->validate([
+    //         'name'=> 'required' ,
+    //         'email'=> 'required' ,
+    //         'phone'=> 'required' ,
+    //         'date'=> 'required' ,
+    //         'time'=> 'required' ,
+    //         'number_of_persons'=> 'required' ,
+    //     ]);
+
+    //     // dd(Carbon::parse($request->date)->format('Y-m-d'));
+    //     $origin_array = [
+    //         'tk' => 'tiktok',
+    //         'in' => 'instagrame',
+    //         'fb' => 'facebook',
+    //         'yt' => 'youtube',
+    //     ];
+    //     $origin_to_store = 'direct';
+    //     foreach($origin_array as $key => $value){
+    //         if($request->origin == $key){
+    //             $origin_to_store = $value;
+    //             break;
+    //         }
+    //     }
+
+
+    //     $res = Resevation::create([
+    //         'full_name'=> $request->name ,
+    //         'email'=> $request->email ,
+    //         'phone'=> $request->phone ,
+    //         'date'=> Carbon::parse($request->date)->format('Y-m-d') ,
+    //         'time'=> $request->time ,
+    //         'number_of_persons'=> $request->number_of_persons ,
+    //         'message'=> $request->message ,
+    //         'origin'=> $origin_to_store,
+    //     ]);
+    //     \session()->flash('success','Merci votre demande de réservation est en attente de confirmation. Les mises à jour seront envoyées à l\'adresse e-mail que vous avez fournie.');
+    //         Mail::to($request->email)->send(new ReservationEmail($res,'reserve','no message'));
+    //     return back();
+    // }
 
     public function reject(Request $request,$id){
 
@@ -112,8 +158,10 @@ class ReservationController extends Controller
             'status' => 'confirmed'
         ]);
 
-        if($res)
+        if($res){
+            $response = Http::post('https://dash.leblokk.com/api/res', $res);
             Mail::to($reservation_mail)->send(new ReservationEmail($res,'confirm',$emailMessage));
+        }
 
         session()->flash('success','Rservation a été Confirmé avec succée');
         return back();
@@ -127,7 +175,9 @@ class ReservationController extends Controller
         $reservation_mail = $res->email;
 
 
-        $res->delete();
+        $res->update([
+            'deleted'=> 1
+        ]);
 
         if($res)
             Mail::to($reservation_mail)->send(new ReservationEmail($res,'reject',$emailMessage ));
@@ -138,7 +188,9 @@ class ReservationController extends Controller
 
     public function destroy(Request $request){
         // dd($request->bookings);
-        $res = Resevation::whereIn('id',$request->bookings)->delete();
+        $res = Resevation::whereIn('id',$request->bookings)->update([
+            'deleted' => 1
+        ]);
 
         session()->flash('delete','Rservation a été supprimé avec succée');
         return to_route('dashboard');
@@ -150,7 +202,6 @@ class ReservationController extends Controller
 
         return view('admin.reservationEdit',compact('res'));
     }
-
     public function update(Request $request,$id){
 
         $request->validate([
@@ -182,33 +233,74 @@ class ReservationController extends Controller
             'status'=> $request->status,
             'number_of_persons'=> $request->number_of_persons,
         ]);
-        if($request->has('send_email'))
+        if($request->has('send_email')){
             Mail::to($request->email)->send(new ReservationEmail($res,$status,$emailMessage ));
-
+        }
+        if($request->status == 'confirmed'){
+            $response = Http::post('https://dash.leblokk.com/api/res', $res);
+        }
 
         session()->flash('success','La reservation a été modifier.');
-        return back();
+        return to_route('dashboard');
     }
+    // public function update(Request $request,$id){
+
+    //     $request->validate([
+    //         'name'=> 'required' ,
+    //         'email'=> 'required' ,
+    //         'phone'=> 'required' ,
+    //         'date'=> 'required' ,
+    //         'time'=> 'required' ,
+    //         'status'=> 'required' ,
+    //         'number_of_persons'=> 'required' ,
+    //     ]);
+    //     if($request->status == 'declined'){
+    //         $status = 'reject';
+    //     }elseif($request->status == 'confirmed'){
+    //         $status = 'confirm';
+
+    //     }else{
+    //         $status = 'pending';
+    //     }
+    //     $emailMessage = '';
+    //     $res = Resevation::findOrfail($id);
+
+    //    $res->update([
+    //         'full_name'=> $request->name ,
+    //         'email'=> $request->email ,
+    //         'phone'=> $request->phone ,
+    //         'date'=> Carbon::parse($request->date)->format('Y-m-d') ,
+    //         'time'=> $request->time,
+    //         'status'=> $request->status,
+    //         'number_of_persons'=> $request->number_of_persons,
+    //     ]);
+    //     if($request->has('send_email'))
+    //         Mail::to($request->email)->send(new ReservationEmail($res,$status,$emailMessage ));
+
+
+    //     session()->flash('success','La reservation a été modifier.');
+    //     return back();
+    // }
 
     public function export(Request $request){
 
         if($request->date== 'upcoming' ){
 
             $date = 'upcoming';
-            $reservations = Resevation::whereDate('date','>',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
+            $reservations = Resevation::where('deleted',0)->whereDate('date','>',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
         }elseif($request->date== 'range'){
             $date = 'range';
 
             $Filter_Date_From = $request->start ?? Carbon::now();
             $Filter_Date_To = $request->end ?? Carbon::now();
 
-            $reservations = Resevation::whereDate('date', '>=', $Filter_Date_From)
+            $reservations = Resevation::where('deleted',0)->whereDate('date', '>=', $Filter_Date_From)
                                         ->whereDate('date', '<=', $Filter_Date_To)
                                         ->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
 
         }elseif($request->date== 'today'){
             $date = 'today';
-            $reservations = Resevation::whereDate('date',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
+            $reservations = Resevation::where('deleted',0)->whereDate('date',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
 
             // $reservations = Resevation::whereDate('date',Carbon::today())->whereIn('status',$request->etat)->get(['id','full_name','email','phone','date','time','message','status']);
         }

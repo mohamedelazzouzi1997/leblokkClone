@@ -18,6 +18,12 @@
                                 class="px-2 py-1 mx-2 bg-danger rounded-full text-white">{{ $bookings->count() }}</span>
                         @endif
                     </x-nav-link>
+                    <x-nav-link href="{{ route('deleted.res') }}" :active="request()->routeIs('deleted.res')">
+                        <i class="fa-solid fa-trash mr-1"></i>  Bookings @if (isset($deleted_bookings))
+                            <span
+                                class="px-2 py-1 mx-2 bg-danger rounded-full text-white">{{ $deleted_bookings->count() }}</span>
+                        @endif
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -30,8 +36,8 @@
                         <x-slot name="trigger">
 
                             <span class="inline-flex rounded-md">
-                                <button type="button"
-                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 bg-black hover:text-gray-200 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
+                                <button type="button" style='color:white'
+                                    class="inline-flex items-center px-3  py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 bg-black hover:text-gray-200 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
                                     {{ Auth::user()->name }}
 
                                     <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"

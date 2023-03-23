@@ -39,6 +39,8 @@ Route::post('reservation/store',[ReservationController::class,'store'])->name('r
 //admin routes
 Route::middleware(['auth','is_admin'])->group(function () {
     Route::get('/reservation', [ReservationController::class,'index'])->name('dashboard');
+    Route::get('/reservation/deleted', [ReservationController::class,'deletedReservation'])->name('deleted.res');
+    Route::get('/reservation/restor/{id}', [ReservationController::class,'restorReservation'])->name('restor.res');
     Route::get('/reservation/{id}/details', [ReservationController::class,'show'])->name('reservation.show');
     Route::post('/reservation/{id}/delete', [ReservationController::class,'delete'])->name('reservation.delete');
     Route::post('/reservation/{id}/reject', [ReservationController::class,'reject'])->name('reservation.reject');
