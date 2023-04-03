@@ -25,7 +25,7 @@ class ReservationController extends Controller
         return view('admin.dashboard',compact('reservations'));
     }
     public function deletedReservation(){
-        
+
             $reservations = Resevation::latest('id')->where('deleted',1)->get();
 
         // dd($reservations);
@@ -196,7 +196,13 @@ class ReservationController extends Controller
         return to_route('dashboard');
     }
 
+    public function hardDestroy(Request $request){
+        // dd($request->bookings);
+        $res = Resevation::whereIn('id',$request->bookings)->delete();
 
+        session()->flash('delete','Rservation a été supprimé avec succée Définitivement');
+        return to_route('deleted.res');
+    }
     public function edit($id){
         $res = Resevation::findOrfail($id);
 
